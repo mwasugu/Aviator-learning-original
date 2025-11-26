@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Learning Log (Live Time Auto-Reset)</title>
     <style>
-        /* CSS YA UREMBO (Slightly modified) */
+        /* CSS YA UREMBO */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #0d0d0d;
@@ -25,7 +25,7 @@
             max-width: 450px;
         }
         h1 {
-            color: #00bcd4; /* Light Blue for new focus */
+            color: #00bcd4;
             text-align: center;
             margin-bottom: 25px;
             font-size: 28px;
@@ -55,7 +55,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.1s;
-            margin-bottom: 10px; /* Added spacing */
+            margin-bottom: 10px;
         }
         button:active {
             transform: scale(0.98);
@@ -63,15 +63,15 @@
 
         /* MAIN BUTTON STYLES */
         #logButton {
-            background-color: #00bcd4; /* Blue for Logging */
+            background-color: #00bcd4;
             color: #1a1a1a;
             margin-bottom: 15px;
         }
         #logButton:hover { background-color: #4dd0e1; }
         
-        /* ACTION BUTTONS (New) */
+        /* ACTION BUTTONS */
         #deleteLastBtn {
-            background-color: #FF9800; /* Orange for Delete */
+            background-color: #FF9800;
             color: #1a1a1a;
             padding: 10px;
             font-size: 16px;
@@ -79,7 +79,7 @@
         #deleteLastBtn:hover { background-color: #FFB74D; }
 
         #resetErrorsBtn {
-            background-color: #F44336; /* Red for Reset */
+            background-color: #F44336;
             color: white;
             padding: 10px;
             font-size: 16px;
@@ -87,18 +87,38 @@
         #resetErrorsBtn:hover { background-color: #E57373; }
         
         /* VOICE INPUT & CLOCK STYLES */
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         #micBtn {
             width: auto; 
             padding: 10px 15px; 
             background-color: #2196F3;
             color: white;
-            margin-bottom: 20px;
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        #autoSubmitToggle {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #333;
+            color: white;
+            margin-bottom: 0;
+        }
+        #autoSubmitToggle.on {
+            background-color: #4CAF50;
+        }
+        #autoSubmitToggle.off {
+            background-color: #9E9E9E;
         }
         #clockDisplay {
             text-align: center;
             font-size: 36px;
             font-weight: bold;
-            color: #E57373; /* Red for timer */
+            color: #E57373;
             margin-bottom: 20px;
             padding: 10px 0;
             border-bottom: 2px solid #333;
@@ -145,7 +165,7 @@
             border-radius: 8px;
             margin-top: 10px;
             text-align: center;
-            display: none; /* Hide by default */
+            display: none;
         }
 
         #historyLog {
@@ -181,7 +201,11 @@
         
         <div style="display: flex; align-items: center;">
             <input type="number" id="roundInput" step="0.01" placeholder="Mfano: 1.50 au 8.23" style="margin-right: 10px; margin-bottom: 0;">
-            <button id="micBtn" style="width: auto; padding: 10px 15px;">🎤</button>
+            </div>
+        
+        <div class="voice-controls">
+            <button id="micBtn">🎤 Ongea</button>
+            <button id="autoSubmitToggle" class="off">Automatic Voice Input: OFF</button>
         </div>
         
         <button id="logButton">INGIZA MATOKEO HALISI na Jifunze</button>
@@ -212,8 +236,8 @@
 
     <script>
         // --- GLOBAL VARIABLES ---
-        const CYCLE_SECONDS = 720; // 12 minutes * 60 seconds
-        const ERROR_THRESHOLD = 2.00; // Multiplier Chini ya Hii Inachukuliwa Kama 'Kosa' (Red Zone)
+        const CYCLE_SECONDS = 720;
+        const ERROR_THRESHOLD = 2.00; 
         const MIN_ATTEMPTS_FOR_RESET = 30; 
         const MISTAKE_PERCENTAGE_RESET = 0.35; 
         
@@ -221,6 +245,9 @@
         let mistakes = parseInt(localStorage.getItem('aviator_mistakes') || 0);
         let history = JSON.parse(localStorage.getItem('aviator_history') || '[]');
         
+        // NEW GLOBAL VARIABLE FOR TOGGLE
+        let isAutoSubmitEnabled = false; 
+
         const MIC_BUTTON_DEFAULT_COLOR = '#2196F3'; 
         const MIC_BUTTON_RECORDING_COLOR = '#FF0000'; 
         
@@ -229,6 +256,7 @@
         const deleteLastBtn = document.getElementById('deleteLastBtn');
         const resetErrorsBtn = document.getElementById('resetErrorsBtn');
         const micBtn = document.getElementById('micBtn');
+        const autoSubmitToggle = document.getElementById('autoSubmitToggle'); // NEW ELEMENT
         const clockDisplay = document.getElementById('clockDisplay');
         const logStatusEl = document.getElementById('logStatus');
         const zoneStatusEl = document.getElementById('zoneStatus');
@@ -237,7 +265,7 @@
         const riskAssessmentEl = document.getElementById('riskAssessment');
         const resetWarningEl = document.getElementById('resetWarning');
 
-        // --- CORE FUNCTIONS ---
+        // --- CORE FUNCTIONS (Unchanged) ---
 
         function resetSystem(fullReset = true) {
             if (fullReset) {
@@ -260,7 +288,7 @@
         function checkForAutoReset() {
             if (attempts > MIN_ATTEMPTS_FOR_RESET) {
                 if (mistakes / attempts > MISTAKE_PERCENTAGE_RESET) {
-                    resetSystem(true); // Fanya Full Reset
+                    resetSystem(true);
                 }
             }
         }
@@ -270,11 +298,9 @@
             learningStatusEl.textContent = 
                 `Raundi za Kuandikisha: ${attempts} | Makosa (chini ya ${ERROR_THRESHOLD}x): ${mistakes} (${errorPercent}%)`;
             
-            // Hifadhi
             localStorage.setItem('aviator_attempts', attempts);
             localStorage.setItem('aviator_mistakes', mistakes);
 
-            // Angalia auto-reset
             checkForAutoReset(); 
         }
 
@@ -374,13 +400,14 @@
             riskAssessmentEl.textContent = message;
         }
 
-        // --- VOICE INPUT LOGIC (Left unchanged) ---
+
+        // --- VOICE INPUT LOGIC (MODIFIED) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.continuous = false;
-            recognition.lang = 'sw-TZ'; // Changed language to Swahili for better detection
+            recognition.lang = 'sw-TZ'; 
             micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR;
 
             micBtn.addEventListener('click', () => {
@@ -392,31 +419,55 @@
             recognition.onresult = (event) => {
                 const result = event.results[0][0].transcript;
                 const numberMatch = result.match(/(\d+\.?\d*)/); 
-                micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR;
-                micBtn.textContent = '🎤';
-
+                
                 if (numberMatch) {
-                    roundInput.value = parseFloat(numberMatch[0]).toFixed(2);
-                    logStatusEl.textContent = "Sauti Imepokelewa. Bonyeza kitufe.";
+                    const number = parseFloat(numberMatch[0]).toFixed(2);
+                    roundInput.value = number;
+                    
+                    // NEW: Auto-enter logic
+                    if (isAutoSubmitEnabled) {
+                        logButton.click(); // Bonyeza kitufe cha log
+                        logStatusEl.textContent = `Sauti (${number}x) Imepokelewa na Kuandikishwa.`;
+                    } else {
+                        logStatusEl.textContent = `Sauti (${number}x) Imepokelewa. Bonyeza kitufe kuingiza.`;
+                    }
                 } else {
                      logStatusEl.textContent = "Sikuelewi. Jaribu tena au andika.";
                 }
             };
+
             recognition.onspeechend = () => {
                 micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR; 
-                micBtn.textContent = '🎤';
+                micBtn.textContent = '🎤 Ongea';
                 recognition.stop();
             };
             recognition.onerror = () => {
                 micBtn.style.backgroundColor = MIC_BUTTON_DEFAULT_COLOR; 
-                micBtn.textContent = '🎤';
+                micBtn.textContent = '🎤 Ongea';
+                logStatusEl.textContent = "Kosa la Sauti. Jaribu tena.";
             };
 
         } else {
             micBtn.style.display = 'none';
+            autoSubmitToggle.style.display = 'none';
         }
 
-        // --- MAIN LOGGING BUTTON HANDLER (Simplified) ---
+        // --- AUTO-SUBMIT TOGGLE HANDLER (NEW) ---
+        autoSubmitToggle.addEventListener('click', () => {
+            isAutoSubmitEnabled = !isAutoSubmitEnabled;
+            if (isAutoSubmitEnabled) {
+                autoSubmitToggle.textContent = 'Automatic Voice Input: ON ✅';
+                autoSubmitToggle.classList.remove('off');
+                autoSubmitToggle.classList.add('on');
+            } else {
+                autoSubmitToggle.textContent = 'Automatic Voice Input: OFF ❌';
+                autoSubmitToggle.classList.remove('on');
+                autoSubmitToggle.classList.add('off');
+            }
+        });
+
+
+        // --- MAIN LOGGING BUTTON HANDLER (Unchanged) ---
         logButton.addEventListener('click', () => {
             const actual = parseFloat(roundInput.value);
 
@@ -427,7 +478,7 @@
 
             // 1. Fanya Logic ya Kujifunza
             attempts++;
-            const isMistake = (actual < ERROR_THRESHOLD); // Kosa = Matokeo ni Chini ya 2.0x
+            const isMistake = (actual < ERROR_THRESHOLD);
             if (isMistake) { 
                 mistakes++;
             }
@@ -439,7 +490,7 @@
                 cycleSecond: getCurrentCycleSeconds(),
                 actual: actual.toFixed(2),
                 zone: getZone(actual),
-                isMistake: isMistake, // Hifadhi kosa kwa ajili ya kufuta
+                isMistake: isMistake,
             };
             updateHistory(historyEntry);
 
@@ -448,35 +499,33 @@
             logStatusEl.textContent = `Matokeo ya ${actual.toFixed(2)}x Yameandikishwa.`;
             zoneStatusEl.className = `zone-status ${getZoneClass(actual)}`;
             zoneStatusEl.textContent = `Hii ni: ${getZone(actual)}`;
-            roundInput.value = ''; // Futa input kwa raundi inayofuata
+            roundInput.value = '';
         });
 
-        // --- DELETE LAST ROUND BUTTON HANDLER (New) ---
+        // --- DELETE LAST ROUND BUTTON HANDLER (Unchanged) ---
         deleteLastBtn.addEventListener('click', () => {
             if (history.length === 0) {
                 logStatusEl.textContent = "Hakuna raundi za kufuta.";
                 return;
             }
 
-            const deletedRound = history.shift(); // Ondoa raundi ya kwanza (ya mwisho kuwekwa)
+            const deletedRound = history.shift();
 
-            // Rudisha nyuma attempts na mistakes
             attempts = Math.max(0, attempts - 1);
             if (deletedRound.isMistake) {
                 mistakes = Math.max(0, mistakes - 1);
             }
 
-            // Hifadhi, Render, na Update Status
             localStorage.setItem('aviator_history', JSON.stringify(history));
             updateLearningStatus();
             renderHistory();
             logStatusEl.textContent = `Raundi ya mwisho (${deletedRound.actual}x) imefutwa.`;
         });
 
-        // --- RESET ERRORS BUTTON HANDLER (New) ---
+        // --- RESET ERRORS BUTTON HANDLER (Unchanged) ---
         resetErrorsBtn.addEventListener('click', () => {
              if(confirm("Uko na uhakika unataka kufuta rekodi zote za MAKOSA (ERRORS)? Jaribio (Attempts) na Historia (History) zitabaki.")) {
-                 resetSystem(false); // Fanya Reset ya Errors tu
+                 resetSystem(false);
                  resetWarningEl.textContent = 'Makosa Yote Yamefutwa.';
              }
         });
